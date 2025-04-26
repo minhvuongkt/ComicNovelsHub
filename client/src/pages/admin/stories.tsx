@@ -78,8 +78,14 @@ export default function AdminStories() {
   
   // Create story mutation
   const createStoryMutation = useMutation({
-    mutationFn: async (storyData: InsertStory) => {
-      const res = await apiRequest("POST", "/api/stories", storyData);
+    mutationFn: async (storyData: InsertStory & { genres?: number[] }) => {
+      // Extract genres from storyData to send separately
+      const { genres, ...storyDataWithoutGenres } = storyData as any;
+      
+      const res = await apiRequest("POST", "/api/stories", {
+        ...storyDataWithoutGenres,
+        genres: genres || [] // Send genres as a separate property
+      });
       return await res.json();
     },
     onSuccess: () => {
@@ -102,8 +108,20 @@ export default function AdminStories() {
   
   // Update story mutation
   const updateStoryMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertStory> }) => {
-      const res = await apiRequest("PATCH", `/api/stories/${id}`, data);
+    mutationFn: async ({ 
+      id, 
+      data 
+    }: { 
+      id: number, 
+      data: Partial<InsertStory> & { genres?: number[] } 
+    }) => {
+      // Extract genres from data to send separately
+      const { genres, ...dataWithoutGenres } = data as any;
+      
+      const res = await apiRequest("PATCH", `/api/stories/${id}`, {
+        ...dataWithoutGenres,
+        genres: genres || [] // Send genres as a separate property
+      });
       
       if (!res.ok) {
         // Try to parse the error response
@@ -200,6 +218,8 @@ export default function AdminStories() {
     { name: "group_id", label: "Translation Group", type: "select", 
       endpoint: "/api/groups", labelKey: "name", valueKey: "id" },
     { name: "release_year", label: "Release Year", type: "number" },
+    { name: "genres", label: "Genres", type: "select", multiple: true,
+      endpoint: "/api/genres", labelKey: "name", valueKey: "id" },
   ];
   
   // Table columns

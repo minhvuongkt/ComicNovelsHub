@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "wouter";
 import { Story, Chapter } from "@/types";
 import { Button } from "@/components/ui/button";
