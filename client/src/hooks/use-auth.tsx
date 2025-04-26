@@ -9,7 +9,7 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type LoginCredentials = {
-  username: string;
+  email: string;
   password: string;
 };
 

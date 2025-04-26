@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { Navbar } from "@/components/layout/navbar";
-import { MobileNavbar } from "@/components/layout/mobile-navbar";
+import { Layout } from "@/components/layout/layout";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -101,10 +100,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <div className="flex-grow flex items-center justify-center px-4 py-8">
+    <Layout>
+      <div className="flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
           {/* Left column - Auth forms */}
           <div>
@@ -389,7 +386,6 @@ export default function AuthPage() {
         </div>
       </div>
       
-      <MobileNavbar />
-    </div>
+    </Layout>
   );
 }
