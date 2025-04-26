@@ -64,6 +64,14 @@ export function DataForm({
         } else if (field.type === "select" && field.multiple) {
           // For multiple select fields, expect an array of values
           schema = z.array(z.string()).optional().default([]);
+        } else if (field.type === "select") {
+          // For single select fields, accept either string or number but store as string
+          schema = field.required
+            ? z.string().min(1, `${field.label} is required`)
+            : z.preprocess(
+                (val) => val === null || val === undefined ? undefined : String(val),
+                z.string().optional()
+              );
         } else {
           schema = field.required
             ? z.string().min(1, `${field.label} is required`)
