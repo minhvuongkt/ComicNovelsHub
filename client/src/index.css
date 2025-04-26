@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --primary: 224 76% 48%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --accent: 329 85% 62%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 224 76% 48%;
+  --radius: 0.5rem;
+  --chart-1: 224 76% 48%;
+  --chart-2: 329 85% 62%;
+  --chart-3: 265 89% 62%;
+  --chart-4: 38 92% 50%;
+  --chart-5: 187 86% 42%;
+  --sidebar-background: 224 76% 48%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 0 0% 100%;
+  --sidebar-primary-foreground: 224 76% 48%;
+  --sidebar-accent: 0 0% 90%;
+  --sidebar-accent-foreground: 224 76% 68%;
+  --sidebar-border: 224 76% 38%;
+  --sidebar-ring: 224 76% 28%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 224 76% 48%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 329 85% 62%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --chart-1: 224 76% 58%;
+  --chart-2: 329 85% 72%;
+  --chart-3: 265 89% 72%;
+  --chart-4: 38 92% 60%;
+  --chart-5: 187 86% 52%;
+  --sidebar-background: 240 10% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 224 76% 48%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 0 0% 90%;
+  --sidebar-border: 240 3.7% 20%;
+  --sidebar-ring: 224 76% 48%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* Custom font family for reading containers */
+  .reading-container {
+    @apply max-w-3xl mx-auto px-4 md:px-6;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* Chapter content spacing for readability */
+  .chapter-content p {
+    @apply mb-4;
+  }
+
+  /* Prevent images from overflowing in reading mode */
+  .chapter-content img {
+    @apply max-w-full h-auto mx-auto my-2;
+  }
+
+  /* Custom scroll styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted dark:bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 dark:bg-muted-foreground/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50 dark:bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Genre badge styles */
+  .genre-badge {
+    @apply px-2 py-1 text-xs font-medium rounded inline-flex items-center gap-1;
+  }
+
+  .genre-badge.action {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300;
+  }
+
+  .genre-badge.adventure {
+    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300;
+  }
+
+  .genre-badge.comedy {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300;
+  }
+
+  .genre-badge.drama {
+    @apply bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300;
+  }
+
+  .genre-badge.fantasy {
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300;
+  }
+
+  .genre-badge.horror {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300;
+  }
+
+  .genre-badge.mystery {
+    @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300;
+  }
+
+  .genre-badge.romance {
+    @apply bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300;
+  }
+
+  .genre-badge.sci-fi {
+    @apply bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300;
+  }
+
+  .genre-badge.slice-of-life {
+    @apply bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300;
+  }
+}
