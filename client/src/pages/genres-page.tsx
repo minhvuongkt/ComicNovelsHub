@@ -1,25 +1,42 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Helmet } from "react-helmet";
 import { Layout } from "@/components/layout/layout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Bookmark, 
+  BookOpen, 
+  Calendar, 
+  Clock, 
+  Film, 
+  Flame, 
+  Heart, 
+  Laugh, 
+  Layers, 
+  Swords, 
+  Zap 
+} from "lucide-react";
 import { Genre } from "@shared/schema";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
+const GENRE_ICONS: Record<string, React.ReactNode> = {
+  "Action": <Swords className="h-6 w-6" />,
+  "Adventure": <Layers className="h-6 w-6" />,
+  "Comedy": <Laugh className="h-6 w-6" />,
+  "Drama": <Film className="h-6 w-6" />,
+  "Fantasy": <Zap className="h-6 w-6" />,
+  "Historical": <Calendar className="h-6 w-6" />,
+  "Horror": <Flame className="h-6 w-6" />,
+  "Romance": <Heart className="h-6 w-6" />,
+  "Sci-Fi": <BookOpen className="h-6 w-6" />,
+  "Slice of Life": <Clock className="h-6 w-6" />,
+};
 
 export default function GenresPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  
   const { data: genres, isLoading, error } = useQuery<Genre[]>({
     queryKey: ["/api/genres"],
   });
-  
-  const filteredGenres = genres?.filter(genre => 
-    genre.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (genre.description && genre.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   return (
     <Layout>
@@ -28,75 +45,74 @@ export default function GenresPage() {
       </Helmet>
       
       <div className="container mx-auto py-8 px-4">
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Browse by Genre</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl mb-6">
-            Discover stories across different genres. From action-packed adventures to heartwarming romances,
-            find exactly what you're looking for.
+        <div className="max-w-4xl mx-auto mb-10">
+          <h1 className="text-3xl font-bold mb-4">Browse Stories by Genre</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Explore our collection of stories categorized by genre. Click on a genre to see all stories in that category.
           </p>
-          
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <Input
-              placeholder="Search genres..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
         </div>
         
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(9)].map((_, index) => (
-              <Card key={index} className="overflow-hidden">
-                <CardHeader>
-                  <Skeleton className="h-6 w-36 mb-1" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-3/4" />
-                </CardContent>
-                <CardFooter>
-                  <Skeleton className="h-4 w-20" />
-                </CardFooter>
-              </Card>
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <GenreCardSkeleton key={i} />
             ))}
           </div>
-        ) : error ? (
-          <div className="text-center py-10">
-            <p className="text-red-500">Failed to load genres. Please try again later.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGenres?.map((genre) => (
+        )}
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to load genres. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {genres && genres.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {genres.map((genre) => (
               <Link key={genre.id} href={`/genres/${genre.id}`}>
-                <a className="block h-full">
-                  <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <CardTitle>{genre.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="line-clamp-3">
-                        {genre.description || "No description available"}
-                      </CardDescription>
-                    </CardContent>
-                    <CardFooter>
-                      <p className="text-sm text-primary">Browse stories &rarr;</p>
-                    </CardFooter>
-                  </Card>
-                </a>
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="flex flex-col items-center text-center p-6">
+                    <div className="bg-primary/10 rounded-full p-4 mb-4">
+                      {GENRE_ICONS[genre.name] || <Bookmark className="h-6 w-6" />}
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{genre.name}</h3>
+                    {genre.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {genre.description}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               </Link>
             ))}
-            
-            {filteredGenres?.length === 0 && (
-              <div className="col-span-3 text-center py-10">
-                <p className="text-gray-500">No genres found matching your search criteria.</p>
-              </div>
-            )}
+          </div>
+        )}
+        
+        {genres && genres.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">
+              No genres found. Please check back later.
+            </p>
           </div>
         )}
       </div>
     </Layout>
+  );
+}
+
+function GenreCardSkeleton() {
+  return (
+    <Card className="h-full">
+      <CardContent className="flex flex-col items-center text-center p-6">
+        <div className="bg-muted rounded-full p-4 mb-4 h-14 w-14"></div>
+        <div className="h-6 bg-muted rounded w-24 mb-2"></div>
+        <div className="h-4 bg-muted rounded w-full mb-1"></div>
+        <div className="h-4 bg-muted rounded w-2/3"></div>
+      </CardContent>
+    </Card>
   );
 }

@@ -29,6 +29,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch genres" });
     }
   });
+  
+  app.get("/api/genres/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const genre = await storage.getGenre(id);
+      
+      if (!genre) {
+        return res.status(404).json({ message: "Genre not found" });
+      }
+      
+      res.json(genre);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch genre details" });
+    }
+  });
+  
+  app.get("/api/genres/:id/stories", async (req, res) => {
+    try {
+      const genreId = parseInt(req.params.id);
+      const genre = await storage.getGenre(genreId);
+      
+      if (!genre) {
+        return res.status(404).json({ message: "Genre not found" });
+      }
+      
+      const stories = await storage.getStoriesByGenre(genreId);
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch stories by genre" });
+    }
+  });
 
   // Authors API
   app.get("/api/authors", async (req, res) => {

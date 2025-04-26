@@ -36,6 +36,10 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/stories/:id" component={StoryDetailsPage} />
       <Route path="/reading/:storyId/:chapterId" component={ReadingPage} />
+      <Route path="/genres" component={GenresPage} />
+      <Route path="/genres/:id" component={GenreDetailsPage} />
+      <Route path="/rankings" component={RankingsPage} />
+      <Route path="/recent" component={RecentPage} />
       
       {/* Protected routes */}
       <ProtectedRoute path="/profile" component={ProfilePage} />
