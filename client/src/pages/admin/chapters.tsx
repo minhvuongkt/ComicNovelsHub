@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/admin/layout";
-import { DataTable } from "@/components/admin/data-table";
-import { DataForm } from "@/components/admin/data-form";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Story, InsertStory } from "@/types";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { formatDate } from "@/lib/utils";
+import { Chapter, InsertChapter, Story } from "@/types";
+import { DataForm } from "@/components/admin/data-form";
+import { DataTable } from "@/components/admin/data-table";
+import { AdminLayout } from "@/components/admin/layout";
 import {
   Dialog,
   DialogContent,
@@ -39,80 +40,98 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
-  BookOpen,
+  ArrowLeft,
   Plus,
   Loader2
 } from "lucide-react";
 
-export default function AdminStories() {
+export default function AdminChapters() {
+  const params = useParams<{ storyId: string }>();
+  const storyId = params.storyId ? parseInt(params.storyId) : undefined;
+  
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   
-  // Fetch stories
+  // Fetch story details
   const { 
-    data: stories = [], 
-    isLoading,
-    refetch
-  } = useQuery<Story[]>({
-    queryKey: ["/api/stories", { page, search }],
+    data: story,
+    isLoading: isStoryLoading
+  } = useQuery<Story>({
+    queryKey: ["/api/stories", storyId],
     queryFn: async () => {
-      const queryParams = new URLSearchParams();
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", "10");
-      if (search) queryParams.append("filters", JSON.stringify({ title: search }));
-      
-      const res = await fetch(`/api/stories?${queryParams.toString()}`);
-      
-      if (!res.ok) {
-        throw new Error("Failed to fetch stories");
-      }
-      
+      if (!storyId) return null;
+      const res = await fetch(`/api/stories/${storyId}`);
       return res.json();
     },
+    enabled: !!storyId
   });
   
-  // Create story mutation
-  const createStoryMutation = useMutation({
-    mutationFn: async (storyData: InsertStory) => {
-      const res = await apiRequest("POST", "/api/stories", storyData);
+  // Fetch chapters
+  const { 
+    data: chapters = [], 
+    isLoading,
+    refetch
+  } = useQuery<Chapter[]>({
+    queryKey: ["/api/stories", storyId, "chapters", { page, search }],
+    queryFn: async () => {
+      if (!storyId) return [];
+      const queryParams = new URLSearchParams();
+      queryParams.append("page", page.toString());
+      if (search) queryParams.append("search", search);
+      
+      const res = await fetch(`/api/stories/${storyId}/chapters?${queryParams}`);
+      return res.json();
+    },
+    enabled: !!storyId
+  });
+  
+  // Create chapter mutation
+  const createChapterMutation = useMutation({
+    mutationFn: async (chapterData: InsertChapter) => {
+      const res = await apiRequest("POST", "/api/chapters", chapterData);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || "Failed to create chapter");
+      }
+      
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Story created",
-        description: "Story has been successfully created.",
+        title: "Chapter created",
+        description: "Chapter has been successfully created.",
       });
       
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories", storyId, "chapters"] });
       setDialogOpen(false);
     },
     onError: (error) => {
+      console.error("Create chapter error:", error);
       toast({
-        title: "Failed to create story",
+        title: "Failed to create chapter",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
   });
   
-  // Update story mutation
-  const updateStoryMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertStory> }) => {
-      const res = await apiRequest("PATCH", `/api/stories/${id}`, data);
+  // Update chapter mutation
+  const updateChapterMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertChapter> }) => {
+      const res = await apiRequest("PATCH", `/api/chapters/${id}`, data);
       
       if (!res.ok) {
-        // Try to parse the error response
         try {
           const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to update story");
+          throw new Error(errorData.message || "Failed to update chapter");
         } catch (e) {
-          // If parsing fails, throw a generic error with the status
-          throw new Error(`Failed to update story: ${res.status} ${res.statusText}`);
+          throw new Error(`Failed to update chapter: ${res.status} ${res.statusText}`);
         }
       }
       
@@ -120,42 +139,46 @@ export default function AdminStories() {
     },
     onSuccess: () => {
       toast({
-        title: "Story updated",
-        description: "Story has been successfully updated.",
+        title: "Chapter updated",
+        description: "Chapter has been successfully updated.",
       });
       
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories", storyId, "chapters"] });
       setDialogOpen(false);
-      setSelectedStory(null);
+      setSelectedChapter(null);
     },
     onError: (error) => {
-      console.error("Update story error:", error);
+      console.error("Update chapter error:", error);
       toast({
-        title: "Failed to update story",
+        title: "Failed to update chapter",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
   });
   
-  // Delete story mutation
-  const deleteStoryMutation = useMutation({
-    mutationFn: async (storyId: number) => {
-      await apiRequest("DELETE", `/api/stories/${storyId}`);
+  // Delete chapter mutation
+  const deleteChapterMutation = useMutation({
+    mutationFn: async (chapterId: number) => {
+      const res = await apiRequest("DELETE", `/api/chapters/${chapterId}`);
+      
+      if (!res.ok) {
+        throw new Error(`Failed to delete chapter: ${res.status} ${res.statusText}`);
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Story deleted",
-        description: "Story has been successfully deleted.",
+        title: "Chapter deleted",
+        description: "Chapter has been successfully deleted.",
       });
       
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories", storyId, "chapters"] });
       setDeleteDialogOpen(false);
-      setSelectedStory(null);
+      setSelectedChapter(null);
     },
     onError: (error) => {
       toast({
-        title: "Failed to delete story",
+        title: "Failed to delete chapter",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
@@ -172,84 +195,67 @@ export default function AdminStories() {
   // Open create dialog
   const handleOpenCreateDialog = () => {
     setDialogMode("create");
-    setSelectedStory(null);
+    setSelectedChapter(null);
     setDialogOpen(true);
   };
   
   // Open edit dialog
-  const handleOpenEditDialog = (story: Story) => {
+  const handleOpenEditDialog = (chapter: Chapter) => {
     setDialogMode("edit");
-    setSelectedStory(story);
+    setSelectedChapter(chapter);
     setDialogOpen(true);
   };
   
   // Open delete dialog
-  const handleOpenDeleteDialog = (story: Story) => {
-    setSelectedStory(story);
+  const handleOpenDeleteDialog = (chapter: Chapter) => {
+    setSelectedChapter(chapter);
     setDeleteDialogOpen(true);
   };
   
-  // Prepare story form fields
+  // Prepare chapter form fields
   const formFields = [
-    { name: "title", label: "Title", type: "text", required: true },
-    { name: "alternative_title", label: "Alternative Title", type: "text" },
-    { name: "description", label: "Description", type: "textarea" },
-    { name: "cover_image", label: "Cover Image URL", type: "text" },
-    { name: "author_id", label: "Author", type: "select", 
-      endpoint: "/api/authors", labelKey: "name", valueKey: "id" },
-    { name: "group_id", label: "Translation Group", type: "select", 
-      endpoint: "/api/groups", labelKey: "name", valueKey: "id" },
-    { name: "release_year", label: "Release Year", type: "number" },
+    { 
+      name: "story_id", 
+      label: "Story ID", 
+      type: "hidden", 
+      value: storyId,
+    },
+    { 
+      name: "title", 
+      label: "Title", 
+      type: "text", 
+      required: true 
+    },
+    { 
+      name: "chapter_number", 
+      label: "Chapter Number", 
+      type: "number", 
+      required: true 
+    },
+    { 
+      name: "content", 
+      label: "Content", 
+      type: "textarea", 
+      required: true,
+      rows: 10
+    }
   ];
   
   // Table columns
   const columns = [
     {
-      header: "Story",
-      accessorKey: "story",
+      header: "Chapter",
+      accessorKey: "chapter",
       cell: ({ row }: { row: any }) => {
-        const story = row.original;
+        const chapter = row.original;
         return (
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-10 overflow-hidden rounded">
-              <img 
-                src={story.cover_image || "https://placehold.co/400x560/gray/white?text=No+Cover"} 
-                alt={story.title} 
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div>
-              <p className="font-medium">{story.title}</p>
-              {story.alternative_title && (
-                <p className="text-xs text-muted-foreground">{story.alternative_title}</p>
-              )}
-            </div>
+          <div>
+            <p className="font-medium">Chapter {chapter.chapter_number}: {chapter.title}</p>
+            <p className="text-xs text-muted-foreground truncate max-w-md">
+              {chapter.content?.substring(0, 100)}...
+            </p>
           </div>
         );
-      },
-    },
-    {
-      header: "Author",
-      accessorKey: "author_id",
-      cell: ({ row }: { row: any }) => {
-        const author = row.original.author;
-        return author ? author.name : "Unknown";
-      },
-    },
-    {
-      header: "Translation Group",
-      accessorKey: "group_id",
-      cell: ({ row }: { row: any }) => {
-        const group = row.original.group;
-        return group ? group.name : "Unknown";
-      },
-    },
-    {
-      header: "Chapters",
-      accessorKey: "chapters",
-      cell: ({ row }: { row: any }) => {
-        const chaptersCount = row.original.chapters?.length || 0;
-        return chaptersCount;
       },
     },
     {
@@ -263,7 +269,7 @@ export default function AdminStories() {
       header: "Actions",
       accessorKey: "actions",
       cell: ({ row }: { row: any }) => {
-        const story = row.original;
+        const chapter = row.original;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -276,25 +282,18 @@ export default function AdminStories() {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="cursor-pointer"
-                onClick={() => handleOpenEditDialog(story)}
+                onClick={() => handleOpenEditDialog(chapter)}
               >
                 <Edit className="mr-2 h-4 w-4" />
-                <span>Edit Story</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={() => window.location.href = `/admin/stories/${story.id}/chapters`}
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                <span>Manage Chapters</span>
+                <span>Edit Chapter</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="cursor-pointer text-destructive focus:text-destructive"
-                onClick={() => handleOpenDeleteDialog(story)}
+                onClick={() => handleOpenDeleteDialog(chapter)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                <span>Delete Story</span>
+                <span>Delete Chapter</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -303,13 +302,42 @@ export default function AdminStories() {
     },
   ];
   
+  if (isStoryLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    );
+  }
+  
+  if (!story && storyId) {
+    return (
+      <AdminLayout>
+        <div className="py-12 text-center">
+          <p className="text-lg text-muted-foreground">Story not found</p>
+          <Button variant="outline" className="mt-4" onClick={() => window.history.back()}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Stories
+          </Button>
+        </div>
+      </AdminLayout>
+    );
+  }
+  
   return (
     <AdminLayout>
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold">Stories</h1>
-            <p className="text-muted-foreground">Manage your platform's stories</p>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-2xl font-bold">{story?.title} - Chapters</h1>
+            </div>
+            <p className="text-muted-foreground ml-9">Manage chapters for this story</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -318,7 +346,7 @@ export default function AdminStories() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search stories..."
+                  placeholder="Search chapters..."
                   className="pl-8 w-full"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -329,7 +357,7 @@ export default function AdminStories() {
             
             <Button onClick={handleOpenCreateDialog} className="sm:ml-2">
               <Plus className="h-4 w-4 mr-2" />
-              Add Story
+              Add Chapter
             </Button>
           </div>
         </div>
@@ -341,25 +369,25 @@ export default function AdminStories() {
         ) : (
           <DataTable 
             columns={columns} 
-            data={stories} 
+            data={chapters} 
             currentPage={page}
             onPageChange={setPage}
-            totalPages={Math.ceil(stories.length / 10) || 1}
+            totalPages={Math.ceil(chapters.length / 10) || 1}
           />
         )}
       </div>
       
-      {/* Create/Edit Story Dialog */}
+      {/* Create/Edit Chapter Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {dialogMode === "create" ? "Add New Story" : "Edit Story"}
+              {dialogMode === "create" ? "Add New Chapter" : "Edit Chapter"}
             </DialogTitle>
             <DialogDescription>
               {dialogMode === "create" 
-                ? "Fill in the details below to create a new story." 
-                : "Update the story information below."}
+                ? "Fill in the details below to create a new chapter." 
+                : "Update the chapter information below."}
             </DialogDescription>
           </DialogHeader>
           
@@ -367,17 +395,20 @@ export default function AdminStories() {
             fields={formFields}
             onSubmit={(data) => {
               if (dialogMode === "create") {
-                createStoryMutation.mutate(data as InsertStory);
-              } else if (selectedStory) {
-                updateStoryMutation.mutate({
-                  id: selectedStory.id,
-                  data: data as Partial<InsertStory>
+                createChapterMutation.mutate({
+                  ...data,
+                  story_id: storyId!
+                } as InsertChapter);
+              } else if (selectedChapter) {
+                updateChapterMutation.mutate({
+                  id: selectedChapter.id,
+                  data: data as Partial<InsertChapter>
                 });
               }
             }}
-            initialValues={selectedStory || {}}
-            isSubmitting={createStoryMutation.isPending || updateStoryMutation.isPending}
-            submitText={dialogMode === "create" ? "Create Story" : "Update Story"}
+            initialValues={selectedChapter || { story_id: storyId }}
+            isSubmitting={createChapterMutation.isPending || updateChapterMutation.isPending}
+            submitText={dialogMode === "create" ? "Create Chapter" : "Update Chapter"}
           />
         </DialogContent>
       </Dialog>
@@ -389,28 +420,28 @@ export default function AdminStories() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete{" "}
-              <span className="font-semibold">{selectedStory?.title}</span>{" "}
-              and all its associated chapters and comments.
+              <span className="font-semibold">Chapter {selectedChapter?.chapter_number}: {selectedChapter?.title}</span>{" "}
+              and all its associated comments.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (selectedStory) {
-                  deleteStoryMutation.mutate(selectedStory.id);
+                if (selectedChapter) {
+                  deleteChapterMutation.mutate(selectedChapter.id);
                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteStoryMutation.isPending}
+              disabled={deleteChapterMutation.isPending}
             >
-              {deleteStoryMutation.isPending ? (
+              {deleteChapterMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (
-                "Delete Story"
+                "Delete Chapter"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

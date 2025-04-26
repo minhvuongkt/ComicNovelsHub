@@ -17,9 +17,11 @@ import RankingsPage from "@/pages/rankings-page";
 import RecentPage from "@/pages/recent-page";
 import NotFound from "@/pages/not-found";
 
+// Admin pages
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminUsers from "@/pages/admin/users";
 import AdminStories from "@/pages/admin/stories";
+import AdminChapters from "@/pages/admin/chapters";
 import AdminAuthors from "@/pages/admin/authors";
 import AdminGroups from "@/pages/admin/groups";
 import AdminGenres from "@/pages/admin/genres";
@@ -40,14 +42,20 @@ function Router() {
       <Route path="/genres/:id" component={GenreDetailsPage} />
       <Route path="/rankings" component={RankingsPage} />
       <Route path="/recent" component={RecentPage} />
+      <Route path="/recommended" component={HomePage} />
       
       {/* Protected routes */}
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/profile/reading-history" component={ProfilePage} />
+      <ProtectedRoute path="/profile/favorites" component={ProfilePage} />
+      <ProtectedRoute path="/profile/bookmarks" component={ProfilePage} />
+      <ProtectedRoute path="/profile/settings" component={ProfilePage} />
       
       {/* Admin routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} adminOnly />
       <ProtectedRoute path="/admin/users" component={AdminUsers} adminOnly />
       <ProtectedRoute path="/admin/stories" component={AdminStories} adminOnly />
+      <ProtectedRoute path="/admin/stories/:storyId/chapters" component={AdminChapters} adminOnly />
       <ProtectedRoute path="/admin/authors" component={AdminAuthors} adminOnly />
       <ProtectedRoute path="/admin/groups" component={AdminGroups} adminOnly />
       <ProtectedRoute path="/admin/genres" component={AdminGenres} adminOnly />

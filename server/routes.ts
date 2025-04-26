@@ -784,6 +784,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Add PATCH endpoint for chapters to support partial updates
+  app.patch("/api/chapters/:id", async (req, res) => {
+    // Only admins can update chapters
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      
+      // For PATCH, we don't validate the entire schema, just make sure the fields sent are valid
+      // This allows partial updates
+      const chapter = await storage.updateChapter(id, req.body);
+      
+      if (!chapter) {
+        return res.status(404).json({ message: "Chapter not found" });
+      }
+      
+      res.json(chapter);
+    } catch (error) {
+      console.error("Error updating chapter:", error);
+      res.status(500).json({ message: "Failed to update chapter" });
+    }
+  });
+  
+  // Keep the PUT endpoint for full updates
   app.put("/api/chapters/:id", async (req, res) => {
     // Only admins can update chapters
     if (!req.isAuthenticated() || req.user!.role !== "admin") {
