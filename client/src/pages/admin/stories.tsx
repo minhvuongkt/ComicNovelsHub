@@ -104,6 +104,18 @@ export default function AdminStories() {
   const updateStoryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertStory> }) => {
       const res = await apiRequest("PATCH", `/api/stories/${id}`, data);
+      
+      if (!res.ok) {
+        // Try to parse the error response
+        try {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Failed to update story");
+        } catch (e) {
+          // If parsing fails, throw a generic error with the status
+          throw new Error(`Failed to update story: ${res.status} ${res.statusText}`);
+        }
+      }
+      
       return await res.json();
     },
     onSuccess: () => {
@@ -117,6 +129,7 @@ export default function AdminStories() {
       setSelectedStory(null);
     },
     onError: (error) => {
+      console.error("Update story error:", error);
       toast({
         title: "Failed to update story",
         description: error instanceof Error ? error.message : "An unknown error occurred",
