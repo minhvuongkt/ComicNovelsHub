@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X, Search as SearchIcon, Clock } from "lucide-react";
@@ -14,7 +14,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate;
+  const [, setLocation] = useLocation();
   
   // Load recent searches from localStorage
   useEffect(() => {
@@ -48,7 +48,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const handleSearch = () => {
     if (searchTerm.trim() === "") return;
     saveSearch(searchTerm);
-    navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    setLocation(`/search?q=${encodeURIComponent(searchTerm)}`);
     onClose();
   };
   
