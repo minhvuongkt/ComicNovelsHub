@@ -90,16 +90,16 @@ export function AdminSidebar() {
             <nav className="space-y-1">
               {menuItems.map((item) => (
                 <Link key={item.path} href={item.path}>
-                  <a
+                  <div
                     className={`flex items-center rounded-md px-3 py-2 text-sm font-medium ${
                       isActive(item.path)
                         ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/30"
-                    }`}
+                    } cursor-pointer`}
                   >
                     <span className="mr-3">{item.icon}</span>
                     {!collapsed && <span>{item.name}</span>}
-                  </a>
+                  </div>
                 </Link>
               ))}
             </nav>
@@ -127,12 +127,12 @@ export function AdminSidebar() {
               </button>
               
               <Link href="/">
-                <a className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/30">
+                <div className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/30 cursor-pointer">
                   <span className="mr-3">
                     <BookOpen className="h-5 w-5" />
                   </span>
                   {!collapsed && <span>Reader Site</span>}
-                </a>
+                </div>
               </Link>
               
               <button
