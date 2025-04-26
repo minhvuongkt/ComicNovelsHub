@@ -7,7 +7,12 @@ import {
   insertCommentSchema,
   insertReportSchema,
   insertFavoriteSchema,
-  insertReadingHistorySchema
+  insertReadingHistorySchema,
+  insertStorySchema,
+  insertGenreSchema,
+  insertAuthorSchema,
+  insertGroupSchema,
+  insertChapterSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -437,6 +442,398 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+  
+  // Admin Genres API
+  app.post("/api/genres", async (req, res) => {
+    // Only admins can create genres
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const genreData = insertGenreSchema.parse(req.body);
+      const genre = await storage.createGenre(genreData);
+      res.status(201).json(genre);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid genre data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create genre" });
+    }
+  });
+  
+  app.put("/api/genres/:id", async (req, res) => {
+    // Only admins can update genres
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const genreData = insertGenreSchema.parse(req.body);
+      const genre = await storage.updateGenre(id, genreData);
+      
+      if (!genre) {
+        return res.status(404).json({ message: "Genre not found" });
+      }
+      
+      res.json(genre);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid genre data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update genre" });
+    }
+  });
+  
+  app.delete("/api/genres/:id", async (req, res) => {
+    // Only admins can delete genres
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteGenre(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Genre deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Genre not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete genre" });
+    }
+  });
+  
+  // Admin Authors API
+  app.post("/api/authors", async (req, res) => {
+    // Only admins can create authors
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const authorData = insertAuthorSchema.parse(req.body);
+      const author = await storage.createAuthor(authorData);
+      res.status(201).json(author);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid author data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create author" });
+    }
+  });
+  
+  app.put("/api/authors/:id", async (req, res) => {
+    // Only admins can update authors
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const authorData = insertAuthorSchema.parse(req.body);
+      const author = await storage.updateAuthor(id, authorData);
+      
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+      
+      res.json(author);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid author data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update author" });
+    }
+  });
+  
+  app.delete("/api/authors/:id", async (req, res) => {
+    // Only admins can delete authors
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAuthor(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Author deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Author not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete author" });
+    }
+  });
+  
+  // Admin Groups API
+  app.post("/api/groups", async (req, res) => {
+    // Only admins can create groups
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const groupData = insertGroupSchema.parse(req.body);
+      const group = await storage.createGroup(groupData);
+      res.status(201).json(group);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid group data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create group" });
+    }
+  });
+  
+  app.put("/api/groups/:id", async (req, res) => {
+    // Only admins can update groups
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const groupData = insertGroupSchema.parse(req.body);
+      const group = await storage.updateGroup(id, groupData);
+      
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      
+      res.json(group);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid group data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update group" });
+    }
+  });
+  
+  app.delete("/api/groups/:id", async (req, res) => {
+    // Only admins can delete groups
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteGroup(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Group deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Group not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete group" });
+    }
+  });
+  
+  // Admin Stories API
+  app.post("/api/stories", async (req, res) => {
+    // Only admins can create stories
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const storyData = insertStorySchema.parse(req.body);
+      const story = await storage.createStory(storyData);
+      
+      // Handle genres if provided
+      if (req.body.genres && Array.isArray(req.body.genres)) {
+        for (const genreId of req.body.genres) {
+          await storage.addGenreToStory({
+            story_id: story.id,
+            genre_id: genreId
+          });
+        }
+      }
+      
+      res.status(201).json(story);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid story data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create story" });
+    }
+  });
+  
+  app.put("/api/stories/:id", async (req, res) => {
+    // Only admins can update stories
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const storyData = insertStorySchema.parse(req.body);
+      const story = await storage.updateStory(id, storyData);
+      
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      res.json(story);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid story data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update story" });
+    }
+  });
+  
+  app.delete("/api/stories/:id", async (req, res) => {
+    // Only admins can delete stories
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteStory(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Story deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Story not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete story" });
+    }
+  });
+  
+  // Admin Chapters API
+  app.post("/api/chapters", async (req, res) => {
+    // Only admins can create chapters
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const chapterData = insertChapterSchema.parse(req.body);
+      const chapter = await storage.createChapter(chapterData);
+      res.status(201).json(chapter);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid chapter data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create chapter" });
+    }
+  });
+  
+  app.put("/api/chapters/:id", async (req, res) => {
+    // Only admins can update chapters
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const chapterData = insertChapterSchema.parse(req.body);
+      const chapter = await storage.updateChapter(id, chapterData);
+      
+      if (!chapter) {
+        return res.status(404).json({ message: "Chapter not found" });
+      }
+      
+      res.json(chapter);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid chapter data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update chapter" });
+    }
+  });
+  
+  app.delete("/api/chapters/:id", async (req, res) => {
+    // Only admins can delete chapters
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteChapter(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Chapter deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Chapter not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete chapter" });
+    }
+  });
+  
+  // Admin Comments API
+  app.get("/api/admin/comments", async (req, res) => {
+    try {
+      // Get all comments from all stories and chapters
+      const storyComments = [];
+      const chapterComments = [];
+      
+      // In a real implementation we would need pagination, but for simplicity we'll skip it
+      const stories = await storage.listStories();
+      for (const story of stories) {
+        const comments = await storage.listCommentsByStory(story.id);
+        storyComments.push(...comments.map(c => ({ ...c, story })));
+      }
+      
+      const chapters = [];
+      for (const story of stories) {
+        const storyChapters = await storage.listChaptersByStory(story.id);
+        chapters.push(...storyChapters.map(c => ({ ...c, story })));
+      }
+      
+      for (const chapter of chapters) {
+        const comments = await storage.listCommentsByChapter(chapter.id);
+        chapterComments.push(...comments.map(c => ({ ...c, chapter, story: chapter.story })));
+      }
+      
+      res.json([...storyComments, ...chapterComments]);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+  
+  // Admin Reports API
+  app.get("/api/reports", async (req, res) => {
+    // Only admins can view reports
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const reports = await storage.listReports();
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+  
+  app.delete("/api/reports/:id", async (req, res) => {
+    // Only admins can delete reports
+    if (!req.isAuthenticated() || req.user!.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteReport(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Report deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Report not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete report" });
     }
   });
 
