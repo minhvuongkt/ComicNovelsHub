@@ -11,6 +11,10 @@ import AuthPage from "@/pages/auth-page";
 import StoryDetailsPage from "@/pages/story-details-page";
 import ReadingPage from "@/pages/reading-page";
 import ProfilePage from "@/pages/profile-page";
+import GenresPage from "@/pages/genres-page";
+import GenreDetailsPage from "@/pages/genre-details-page";
+import RankingsPage from "@/pages/rankings-page";
+import RecentPage from "@/pages/recent-page";
 import NotFound from "@/pages/not-found";
 
 import AdminDashboard from "@/pages/admin/dashboard";
