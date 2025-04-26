@@ -83,13 +83,15 @@ export function DataForm({
   }, [form, initialValues]);
 
   // Function to render the appropriate input type
-  const renderField = (field: FieldType) => {
+  const renderField = (field: FieldType & { onChange: (...event: any[]) => void; value: any; }) => {
     switch (field.type) {
       case "textarea":
         return (
           <Textarea
             placeholder={`Enter ${field.label.toLowerCase()}`}
             className="resize-none min-h-[100px]"
+            value={field.value || ""}
+            onChange={field.onChange}
           />
         );
       case "select":
@@ -97,7 +99,10 @@ export function DataForm({
           return <SelectWithEndpoint field={field} />;
         } else if (field.options) {
           return (
-            <Select>
+            <Select
+              value={field.value ? String(field.value) : undefined}
+              onValueChange={field.onChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
               </SelectTrigger>
@@ -111,23 +116,38 @@ export function DataForm({
             </Select>
           );
         }
-        return <Input type="text" />;
+        return <Input type="text" value={field.value || ""} onChange={field.onChange} />;
       case "number":
-        return <Input type="number" />;
+        return <Input 
+          type="number" 
+          value={field.value || ""} 
+          onChange={(e) => {
+            const value = e.target.value === "" ? "" : Number(e.target.value);
+            field.onChange(value);
+          }}
+        />;
       default:
-        return <Input type="text" placeholder={`Enter ${field.label.toLowerCase()}`} />;
+        return <Input 
+          type="text" 
+          placeholder={`Enter ${field.label.toLowerCase()}`} 
+          value={field.value || ""} 
+          onChange={field.onChange}
+        />;
     }
   };
 
   // Component for Select with API endpoint
-  function SelectWithEndpoint({ field }: { field: FieldType }) {
+  function SelectWithEndpoint({ field }: { field: FieldType & { onChange: (...event: any[]) => void; value: any; } }) {
     const { data = [], isLoading } = useQuery<any[]>({
       queryKey: [field.endpoint!],
       enabled: !!field.endpoint,
     });
 
     return (
-      <Select>
+      <Select
+        value={field.value ? String(field.value) : undefined}
+        onValueChange={field.onChange}
+      >
         <SelectTrigger>
           <SelectValue placeholder={isLoading ? "Loading..." : `Select ${field.label.toLowerCase()}`} />
         </SelectTrigger>
