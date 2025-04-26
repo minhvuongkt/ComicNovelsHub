@@ -1,0 +1,190 @@
+GocTruyenNho – Full Plan
+1. Overview
+GocTruyenNho is an online reading platform for comics and novels, featuring two main areas:
+
+Admin Panel: Content and user management.
+
+Reader Site: User interface for reading.
+
+System focuses on:
+
+Optimized UI/UX for mobile (responsive, installable PWA).
+
+Performance and user experience.
+
+2. Admin Panel
+2.1 Admin Account Management
+Login / Logout.
+
+Forgot password (send verification email, reset password).
+
+Change password directly in the dashboard.
+
+2.2 User Management
+Display user list (with pagination).
+
+Search users by name/email.
+
+Delete user (with confirmation).
+
+2.3 Story Management
+Add, edit, delete stories.
+
+Add, edit, delete chapters.
+
+Display story list (filterable by name, translation group, genres, etc.).
+
+View story details (info + chapter list).
+
+2.4 Translation Group Management
+CRUD translation groups (create, edit, delete, list).
+
+2.5 Author Management
+CRUD authors (create, edit, delete, list).
+
+2.6 Genre Management
+CRUD genres (create, edit, delete, list).
+
+2.7 Comment Management
+View all comments (filter by story).
+
+Delete comments (by ID).
+
+2.8 Report Management
+View error reports (e.g., missing chapters, broken images).
+
+Delete reports after resolution.
+
+3. Reader Site
+3.1 Home Page
+Highlighted story lists:
+
+Recommended stories (based on user or random).
+
+Top monthly reads.
+
+Overall popular stories.
+
+Recently updated stories.
+
+Navigation Bar:
+
+Logo, Home, Genres, Search.
+
+Login/Register (or user profile when logged in).
+
+3.2 Story Details
+Basic Information:
+
+Cover image, Alternative names, Author, Translator group, Year, Genres.
+
+Functional Buttons:
+
+"Read from Start" / "Continue Reading".
+
+"Add to Favorites".
+
+Chapter List:
+
+Sortable by Oldest to Newest or vice versa.
+
+Comments:
+
+Commenting and replying system.
+
+Report inappropriate comments.
+
+Display comment time, user name, avatar.
+
+3.3 Reading Interface
+Hide navbar for immersive reading.
+
+Top bar: Story Title - Current Chapter.
+
+Navigation buttons:
+
+Home, Report issue, Chapter list, Previous chapter, Next chapter.
+
+Display content:
+
+Images (high quality) or text (beautiful, clear fonts).
+
+End of chapter navigation.
+
+Comment section at the bottom (same as in story details).
+
+3.4 Login / Registration
+Login:
+
+Email, Password, Remember Me, Forgot Password, link to Register.
+
+Register:
+
+First Name, Last Name, Email, Password, Confirm Password, link to Login.
+
+3.5 Forgot Password
+Step 1: Enter email → Send verification code.
+
+Step 2: Enter code → Reset new password.
+
+3.6 Edit Personal Information
+Edit profile:
+
+Avatar upload/change, First Name, Last Name, Gender.
+
+Reading style settings:
+
+Choose image-by-image reading / default mode.
+
+Choose Dark Mode / Light Mode.
+
+Reading History:
+
+Display story list, last reading chapter, last access time.
+
+Delete individual entries or clear all.
+
+Favorites List:
+
+Similar to reading history.
+
+Remove favorite stories or clear all.
+
+3.7 Change Password
+Enter old password.
+
+Enter new password and confirm.
+
+4. Suggested Technology Stack
+Frontend: ReactJS 
+
+Backend: Laravel
+
+Database: MySQL:
+Schema Database:
+
+Table users | id | first_name | last_name | email | password | avatar | gender | role | created_at |
+
+Table stories | id | title | alternative_title | cover_image | author_id | group_id | release_year | description | created_at |
+
+Table chapters | id | story_id | title | content | chapter_number | created_at |
+
+Table authors | id | name | bio | created_at |
+
+Table groups (Nhóm dịch) | id | name | description | created_at |
+
+Table genres | id | name | description | created_at |
+
+Table story_genre (Liên kết truyện và thể loại – nhiều nhiều) | id | story_id | genre_id |
+
+Table comments | id | user_id | story_id | chapter_id (nullable) | content | parent_id (nullable) | created_at |
+
+Table reports | id | user_id | target_type (story/chapter/comment) | target_id | reason | created_at |
+
+Table favorites | id | user_id | story_id | created_at |
+
+Table reading_histories | id | user_id | story_id | chapter_id | last_read_at |
+
+Authentication: JWT, OAuth2 (future Google/Facebook login).
+
+Mobile-native app: Progressive Web App (PWA).
