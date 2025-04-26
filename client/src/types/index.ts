@@ -12,6 +12,7 @@ export interface Story {
   author?: Author;
   group?: TranslationGroup;
   genres?: Genre[];
+  chapters?: Chapter[];
 }
 
 export interface StorySummary {
@@ -74,6 +75,9 @@ export interface Chapter {
   title: string;
   content: string;
   chapter_number: number;
+  chapter_type?: 'novel' | 'comic' | 'oneshot';
+  images?: string[] | string;
+  font_family?: string;
   created_at: string;
 }
 
