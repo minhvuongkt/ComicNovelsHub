@@ -6,10 +6,9 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { formatDate } from "@/lib/utils";
 import { Chapter, Story } from "@/types";
 import { InsertChapter } from "@shared/schema";
-import { DataForm } from "@/components/admin/data-form";
 import { DataTable } from "@/components/admin/data-table";
 import { AdminLayout } from "@/components/admin/layout";
-import { ChapterTypeSelector } from "@/components/admin/chapter-type-selector";
+import { ChapterForm } from "@/components/admin/chapter-form";
 import {
   Dialog,
   DialogContent,
@@ -410,7 +409,7 @@ export default function AdminChapters() {
       
       {/* Create/Edit Chapter Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
             <DialogTitle>
               {dialogMode === "create" ? "Add New Chapter" : "Edit Chapter"}
@@ -422,78 +421,22 @@ export default function AdminChapters() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6">
-            <DataForm
-              fields={formFields}
-              onSubmit={(data) => {
-                // We'll handle submission in the parent form
-              }}
-              initialValues={selectedChapter || { story_id: storyId }}
-              isSubmitting={false}
-              submitText=""
-            />
-            
-            {/* Add ChapterTypeSelector component */}
-            <div className="mt-4">
-              <ChapterTypeSelector 
-                value={chapterContent}
-                onChange={setChapterContent}
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              disabled={createChapterMutation.isPending || updateChapterMutation.isPending}
-              className="w-full"
-              onClick={() => {
-                const formData = document.querySelector('form')?.elements;
-                if (!formData) return;
-                
-                // Get values from the form
-                const title = (formData.namedItem('title') as HTMLInputElement)?.value;
-                const chapter_number = parseInt((formData.namedItem('chapter_number') as HTMLInputElement)?.value || '0');
-                
-                // Validate required fields
-                if (!title || !chapter_number) {
-                  toast({
-                    title: "Missing required fields",
-                    description: "Please fill out all required fields",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                
-                // Combine form data with chapter content
-                const fullChapterData = {
-                  title,
-                  chapter_number,
-                  story_id: storyId!,
-                  content: chapterContent.content,
-                  chapter_type: chapterContent.chapter_type,
-                  font_family: chapterContent.font_family,
-                  images: JSON.stringify(chapterContent.images)
-                };
-                
-                if (dialogMode === "create") {
-                  createChapterMutation.mutate(fullChapterData as InsertChapter);
-                } else if (selectedChapter) {
-                  updateChapterMutation.mutate({
-                    id: selectedChapter.id,
-                    data: fullChapterData as Partial<InsertChapter>
-                  });
-                }
-              }}
-            >
-              {(createChapterMutation.isPending || updateChapterMutation.isPending) ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                dialogMode === "create" ? "Create Chapter" : "Update Chapter"
-              )}
-            </Button>
-          </div>
+          <ChapterForm
+            storyId={storyId!}
+            chapter={selectedChapter || undefined}
+            onSubmit={(data) => {
+              if (dialogMode === "create") {
+                createChapterMutation.mutate(data);
+              } else if (selectedChapter) {
+                updateChapterMutation.mutate({
+                  id: selectedChapter.id,
+                  data: data
+                });
+              }
+            }}
+            isSubmitting={createChapterMutation.isPending || updateChapterMutation.isPending}
+            mode={dialogMode}
+          />
         </DialogContent>
       </Dialog>
       

@@ -59,8 +59,8 @@ export const chapters = pgTable("chapters", {
   title: text("title").notNull(),
   content: text("content").notNull(), // Text content for novel type
   chapter_type: text("chapter_type").default("novel").notNull(), // "novel", "oneshot", "comic"
-  images: text("images"), // JSON array of image URLs for comic/oneshot types
-  font_family: text("font_family"), // For novel type text customization
+  images: text("images").default("[]"), // JSON array of image URLs for comic/oneshot types
+  font_family: text("font_family").default("Arial, sans-serif"), // For novel type text customization
   chapter_number: integer("chapter_number").notNull(),
   created_at: timestamp("created_at").defaultNow(),
 });
