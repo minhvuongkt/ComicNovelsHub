@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navbar } from "@/components/layout/navbar";
-import { MobileNavbar } from "@/components/layout/mobile-navbar";
+import { Layout } from "@/components/layout/layout";
 import { StoryCarousel } from "@/components/home/story-carousel";
 import { StoryGrid } from "@/components/home/story-grid";
 import { LatestUpdates } from "@/components/home/latest-updates";
@@ -142,10 +141,8 @@ export default function HomePage() {
   const isLoading = isFeaturedLoading || isRecommendedLoading || isUpdatesLoading;
   
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <Navbar />
-      
-      <main className="flex-grow container mx-auto px-4 pb-20 md:pb-8 pt-4">
+    <Layout>
+      <div className="container mx-auto px-4 py-4">
         <div className="space-y-8">
           {isLoading ? (
             <div className="flex justify-center items-center py-16">
@@ -177,9 +174,7 @@ export default function HomePage() {
             </>
           )}
         </div>
-      </main>
-      
-      <MobileNavbar />
-    </div>
+      </div>
+    </Layout>
   );
 }

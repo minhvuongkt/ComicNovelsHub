@@ -111,7 +111,8 @@ export const readingHistories = pgTable("reading_histories", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   created_at: true,
-  role: true,
+}).extend({
+  role: z.enum(['user', 'admin']).default('user').optional(),
 });
 
 export const insertAuthorSchema = createInsertSchema(authors).omit({
