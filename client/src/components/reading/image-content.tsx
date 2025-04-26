@@ -22,12 +22,17 @@ import { Label } from "@/components/ui/label";
 type ImageContentProps = {
   images: string[];
   title: string;
+  type?: 'comic' | 'oneshot'; // Add chapter type property
 };
 
 type ViewMode = "continuous" | "single";
 
-export function ImageContent({ images, title }: ImageContentProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>("continuous");
+export function ImageContent({ images, title, type = 'comic' }: ImageContentProps) {
+  // For oneshot, default to single view
+  // For comics, default to continuous scrolling
+  const defaultViewMode = type === 'oneshot' ? 'single' : 'continuous';
+  
+  const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quality, setQuality] = useState<"high" | "medium" | "low">("high");
   
@@ -163,11 +168,11 @@ export function ImageContent({ images, title }: ImageContentProps) {
         <div className="mt-2">
           {images.length > 0 ? (
             <>
-              <div className="w-full flex justify-center">
+              <div className={`w-full flex justify-center ${type === 'oneshot' ? 'bg-gray-100 dark:bg-gray-800 p-4 rounded-lg' : ''}`}>
                 <img 
                   src={images[currentImageIndex]} 
                   alt={`Page ${currentImageIndex + 1}`} 
-                  className={`w-full ${getImageQualityClass()}`}
+                  className={`${type === 'oneshot' ? 'max-w-2xl mx-auto shadow-lg' : 'w-full'} ${getImageQualityClass()}`}
                 />
               </div>
               

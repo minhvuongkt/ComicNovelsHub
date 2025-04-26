@@ -50,21 +50,47 @@ export default function ReadingPage() {
     if (!chapter) return null;
     
     try {
-      const contentType = parseContentType(chapter.content);
+      // First check the chapter_type field (new field)
+      const chapterType = chapter.chapter_type || 'novel';
       
-      if (contentType === 'image') {
-        // Parse image URLs
+      if (chapterType === 'comic' || chapterType === 'oneshot') {
+        // Parse image URLs from the images field or content
         try {
-          const images = JSON.parse(chapter.content);
-          return <ImageContent images={images} title={chapter.title} />;
+          let images: string[] = [];
+          
+          if (chapter.images) {
+            // If we have the images field, use that
+            images = typeof chapter.images === 'string' 
+              ? JSON.parse(chapter.images) 
+              : chapter.images;
+          } else {
+            // Fallback to parsing content (for backward compatibility)
+            const contentType = parseContentType(chapter.content);
+            if (contentType === 'image') {
+              images = JSON.parse(chapter.content);
+            }
+          }
+          
+          return <ImageContent 
+            images={images} 
+            title={chapter.title} 
+            type={chapterType} 
+          />;
         } catch (e) {
+          console.error("Error parsing image content:", e);
           return <div className="p-8 text-center text-red-500">Error parsing image content.</div>;
         }
       } else {
-        // Text content (novel)
-        return <TextContent content={chapter.content} title={chapter.title} />;
+        // Novel/Text content
+        const fontFamily = chapter.font_family || 'Arial, sans-serif';
+        return <TextContent 
+          content={chapter.content} 
+          title={chapter.title} 
+          fontFamily={fontFamily}
+        />;
       }
     } catch (error) {
+      console.error("Error displaying content:", error);
       return <div className="p-8 text-center text-red-500">Error displaying content. Please report this issue.</div>;
     }
   };

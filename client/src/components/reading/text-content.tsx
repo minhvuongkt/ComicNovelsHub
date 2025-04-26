@@ -23,23 +23,26 @@ import { Slider } from "@/components/ui/slider";
 type TextContentProps = {
   content: string;
   title: string;
+  fontFamily?: string;
 };
 
-export function TextContent({ content, title }: TextContentProps) {
+export function TextContent({ content, title, fontFamily: initialFontFamily }: TextContentProps) {
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.6);
-  const [fontFamily, setFontFamily] = useState<"serif" | "sans-serif" | "monospace">("sans-serif");
+  const [selectedFontFamily, setSelectedFontFamily] = useState<"serif" | "sans-serif" | "monospace">("sans-serif");
   
+  // Get the default font family from the chapter or use the selected one from UI
   const fontFamilyMap = {
     "serif": "'Georgia', serif",
     "sans-serif": "'Nunito', sans-serif",
-    "monospace": "'JetBrains Mono', monospace"
+    "monospace": "'JetBrains Mono', monospace",
+    "default": initialFontFamily || "'Nunito', sans-serif"
   };
   
   const textStyles = {
     fontSize: `${fontSize}px`,
     lineHeight: lineHeight,
-    fontFamily: fontFamilyMap[fontFamily]
+    fontFamily: initialFontFamily || fontFamilyMap[selectedFontFamily]
   };
   
   return (
@@ -90,8 +93,8 @@ export function TextContent({ content, title }: TextContentProps) {
               <div className="space-y-2">
                 <Label htmlFor="font-family">Font Family</Label>
                 <Select
-                  value={fontFamily}
-                  onValueChange={(value) => setFontFamily(value as "serif" | "sans-serif" | "monospace")}
+                  value={selectedFontFamily}
+                  onValueChange={(value) => setSelectedFontFamily(value as "serif" | "sans-serif" | "monospace")}
                 >
                   <SelectTrigger id="font-family">
                     <SelectValue placeholder="Font family" />
