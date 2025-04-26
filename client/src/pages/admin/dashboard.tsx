@@ -2,7 +2,18 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/layout";
 import { StatsCard } from "@/components/admin/stats-card";
-import { Line, Bar } from "recharts";
+import { 
+  LineChart,
+  Line, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from "recharts";
 import {
   Card,
   CardContent,
@@ -118,22 +129,29 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-80 w-full">
-                <Line
-                  data={activityData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <Line
-                    type="monotone"
-                    dataKey="users"
-                    stroke="hsl(var(--chart-1))"
-                    activeDot={{ r: 8 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="chapters"
-                    stroke="hsl(var(--chart-2))"
-                  />
-                </Line>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={activityData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="users"
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="chapters"
+                      stroke="#82ca9d"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -147,16 +165,23 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-80 w-full">
-                <Bar
-                  data={popularGenresData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <Bar
-                    dataKey="count"
-                    fill="hsl(var(--chart-3))"
-                    label={{ position: "top" }}
-                  />
-                </Bar>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={popularGenresData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="count"
+                      fill="#8884d8"
+                      label={{ position: "top" }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
