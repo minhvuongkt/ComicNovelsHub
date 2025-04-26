@@ -4,10 +4,12 @@ import { useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { formatDate } from "@/lib/utils";
-import { Chapter, InsertChapter, Story } from "@/types";
+import { Chapter, Story } from "@/types";
+import { InsertChapter } from "@shared/schema";
 import { DataForm } from "@/components/admin/data-form";
 import { DataTable } from "@/components/admin/data-table";
 import { AdminLayout } from "@/components/admin/layout";
+import { ChapterTypeSelector } from "@/components/admin/chapter-type-selector";
 import {
   Dialog,
   DialogContent,

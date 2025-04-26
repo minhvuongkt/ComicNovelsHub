@@ -52,12 +52,15 @@ export const stories = pgTable("stories", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Chapter table
+// Chapter table with support for different content types
 export const chapters = pgTable("chapters", {
   id: serial("id").primaryKey(),
   story_id: integer("story_id").references(() => stories.id).notNull(),
   title: text("title").notNull(),
-  content: text("content").notNull(), // Can store JSON content or HTML
+  content: text("content").notNull(), // Text content for novel type
+  chapter_type: text("chapter_type").default("novel").notNull(), // "novel", "oneshot", "comic"
+  images: text("images"), // JSON array of image URLs for comic/oneshot types
+  font_family: text("font_family"), // For novel type text customization
   chapter_number: integer("chapter_number").notNull(),
   created_at: timestamp("created_at").defaultNow(),
 });

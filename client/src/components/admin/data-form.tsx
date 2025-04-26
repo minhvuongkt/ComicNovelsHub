@@ -124,7 +124,7 @@ export function DataForm({
       case "number":
         return <Input 
           type="number" 
-          value={field.value || ""} 
+          value={field.value === 0 ? "0" : (field.value || "")} 
           onChange={(e) => {
             const value = e.target.value === "" ? "" : Number(e.target.value);
             field.onChange(value);
