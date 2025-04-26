@@ -33,6 +33,7 @@ type FieldType = {
   labelKey?: string;
   valueKey?: string;
   options?: { label: string; value: string | number }[];
+  multiple?: boolean;
 };
 
 interface DataFormProps {
@@ -60,6 +61,9 @@ export function DataForm({
             (val) => (val === "" ? undefined : Number(val)),
             z.number().optional()
           );
+        } else if (field.type === "select" && field.multiple) {
+          // For multiple select fields, expect an array of values
+          schema = z.array(z.string()).optional().default([]);
         } else {
           schema = field.required
             ? z.string().min(1, `${field.label} is required`)
@@ -142,7 +146,78 @@ export function DataForm({
       queryKey: [field.endpoint!],
       enabled: !!field.endpoint,
     });
-
+    
+    // If multiple selection is enabled
+    if (field.multiple) {
+      // Convert value to array if it exists, or use empty array
+      const selectedValues = Array.isArray(field.value) ? field.value : (field.value ? [field.value] : []);
+      
+      return (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1 p-2 border rounded">
+            {selectedValues.length > 0 ? (
+              selectedValues.map((value) => {
+                const item = data.find((d) => String(d[field.valueKey || "id"]) === String(value));
+                return item ? (
+                  <div key={value} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center">
+                    {item[field.labelKey || "name"]}
+                    <button 
+                      type="button"
+                      className="ml-1 hover:text-destructive"
+                      onClick={() => {
+                        const newValues = selectedValues.filter((v) => v !== value);
+                        field.onChange(newValues);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : null;
+              })
+            ) : (
+              <div className="text-muted-foreground py-1 px-2 text-sm">
+                {isLoading ? "Loading..." : `Select ${field.label.toLowerCase()}`}
+              </div>
+            )}
+          </div>
+          
+          <Select
+            value=""
+            onValueChange={(newValue) => {
+              // Don't add duplicates
+              if (!selectedValues.includes(newValue)) {
+                field.onChange([...selectedValues, newValue]);
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={isLoading ? "Loading..." : `Add ${field.label.toLowerCase()}...`} />
+            </SelectTrigger>
+            <SelectContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                data
+                  // Filter out already selected items
+                  .filter((item) => !selectedValues.includes(String(item[field.valueKey || "id"])))
+                  .map((item) => (
+                    <SelectItem 
+                      key={item[field.valueKey || "id"]} 
+                      value={String(item[field.valueKey || "id"])}
+                    >
+                      {item[field.labelKey || "name"]}
+                    </SelectItem>
+                  ))
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+    
+    // Regular single selection
     return (
       <Select
         value={field.value ? String(field.value) : undefined}
